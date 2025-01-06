@@ -29,11 +29,12 @@ helm install external-secrets \
    external-secrets/external-secrets \
    -n external-secrets \
    --create-namespace \
-   --set installCRDs=true \
-   --set webhook.port=9443 
+   # --set installCRDs=true \
+   # --set webhook.port=9443 
 ```
 
 ## Create the EKS OIDC Provider
+Automatically sets the OIDC Audience (aka Client ID) to "sts.amazonaws.com"
 ```
 eksctl utils associate-iam-oidc-provider --region="$REGION" --cluster="$CLUSTERNAME" --approve
 ```
@@ -67,6 +68,28 @@ eksctl create iamserviceaccount \
     --override-existing-serviceaccounts
 ```
 
+The IAM Role that gets created will have these Trusted Relationship entities attached
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::$ACCNT:oidc-provider/oidc.eks.us-east-2.amazonaws.com/id/703860C207140C2357EC4ADCC3F0D6B4"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "oidc.eks.us-east-2.amazonaws.com/id/703860C207140C2357EC4ADCC3F0D6B4:sub": "system:serviceaccount:default:projjeffsa",
+                    "oidc.eks.us-east-2.amazonaws.com/id/703860C207140C2357EC4ADCC3F0D6B4:aud": "sts.amazonaws.com"
+                }
+            }
+        }
+    ]
+}
+```
+
 ## Create the Secret Store
 Referencing the service account with correct polict permissions
 ```
@@ -80,10 +103,19 @@ kubectl apply -f external-secret.yaml
 
 ## Confirm Secret is created in the namespace
 ```
-kubectl get secret projjeffsecret -n default
+kubectl describe secret projjeffsecret -n default
+
+Data
+====
+CLUSTER_TYPE:             11 bytes
+REGISTRY_USER:            11 bytes
+REGISTRY_PASSWORD:        11 bytes
+KC_ARGOCD_CLIENT_SECRET:  9 bytes
 ```
 
 ## Teardown
+```
 kubectl delete externalsecret projjeffexternalsecret (automatically deletes the Secret projjeffsecret)
 kubectl delete secretstore projjeffsecretsstore
 kubectl delete serviceaccount projjeffsa
+```
