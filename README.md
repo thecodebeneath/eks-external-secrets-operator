@@ -79,7 +79,7 @@ The IAM Role that gets created will have these Trusted Relationship entities att
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Condition": {
                 "StringEquals": {
-                    "oidc.eks.us-east-2.amazonaws.com/id/703860C207140C2357EC4ADCC3F0D6B4:sub": "system:serviceaccount:default:projjeffsa",
+                    "oidc.eks.us-east-2.amazonaws.com/id/703860C207140C2357EC4ADCC3F0D6B4:sub": "system:serviceaccount:jeff:projjeffsa",
                     "oidc.eks.us-east-2.amazonaws.com/id/703860C207140C2357EC4ADCC3F0D6B4:aud": "sts.amazonaws.com"
                 }
             }
@@ -101,7 +101,7 @@ kubectl apply -f external-secret.yaml
 
 ## Confirm Secret is created in the namespace
 ```
-kubectl describe secret projjeffsecret -n default
+kubectl describe secret projjeffsecret -n jeff
 
 Data
 ====
@@ -113,8 +113,9 @@ KC_ARGOCD_CLIENT_SECRET:  9 bytes
 
 ## Teardown
 ```
-kubectl delete externalsecret projjeffexternalsecret (automatically deletes the Secret projjeffsecret)
-kubectl delete secretstore projjeffsecretsstore
-eksctl delete iamserviceaccount projjeffsa --cluster $CLUSTERNAME
+kubectl delete externalsecret projjeffexternalsecret -n jeff
+  -- automatically deletes the Secret projjeffsecret
+kubectl delete secretstore projjeffsecretsstore -n jeff
+eksctl delete iamserviceaccount projjeffsa --cluster $CLUSTERNAME --namespace jeff
   -- this deletes iamserviceaccount, serviceaccount and IAM role
 ```
