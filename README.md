@@ -9,7 +9,7 @@ From the AWS console, use the Create Cluster option: *"Quick configuration (with
 ```
 export REGION=us-east-2
 export ACCNT=$(aws sts get-caller-identity --query Account --output text)
-export CLUSTERNAME=floral-metal-dolphin
+export CLUSTERNAME=extravagant-lofi-dinosaur
 aws eks update-kubeconfig --region "$REGION" --name "$CLUSTERNAME"
 ```
 
@@ -58,7 +58,7 @@ Create IAM policy: ProjJeffSecretsMgrForEksOperator
 
 eksctl create iamserviceaccount \
     --name projjeffsa \
-    --namespace default \
+    --namespace jeff \
     --cluster "$CLUSTERNAME" \
     --role-name "ProjJeffRole" \
     --attach-policy-arn arn:aws:iam::"$ACCNT":policy/ProjJeffSecretsMgrForEksOperator \
