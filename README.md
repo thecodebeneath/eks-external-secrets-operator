@@ -28,9 +28,7 @@ helm repo add external-secrets https://charts.external-secrets.io
 helm install external-secrets \
    external-secrets/external-secrets \
    -n external-secrets \
-   --create-namespace \
-   # --set installCRDs=true \
-   # --set webhook.port=9443 
+   --create-namespace
 ```
 
 ## Create the EKS OIDC Provider
@@ -41,12 +39,12 @@ eksctl utils associate-iam-oidc-provider --region="$REGION" --cluster="$CLUSTERN
 
 ## Create sa, role and policy for Operator
 ```
-Create IAM policy: SecretsMgrForEksOperator
+Create IAM policy: ProjJeffSecretsMgrForEksOperator
 {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "SecretsMgrForEksOperator",
+            "Sid": "ProjJeffSecretsMgrForEksOperator",
             "Effect": "Allow",
             "Action": [
                 "secretsmanager:PutSecretValue",
@@ -63,7 +61,7 @@ eksctl create iamserviceaccount \
     --namespace default \
     --cluster "$CLUSTERNAME" \
     --role-name "ProjJeffRole" \
-    --attach-policy-arn arn:aws:iam::"$ACCNT":policy/SecretsMgrForEksOperator \
+    --attach-policy-arn arn:aws:iam::"$ACCNT":policy/ProjJeffSecretsMgrForEksOperator \
     --approve \
     --override-existing-serviceaccounts
 ```
@@ -117,5 +115,6 @@ KC_ARGOCD_CLIENT_SECRET:  9 bytes
 ```
 kubectl delete externalsecret projjeffexternalsecret (automatically deletes the Secret projjeffsecret)
 kubectl delete secretstore projjeffsecretsstore
-kubectl delete serviceaccount projjeffsa
+eksctl delete iamserviceaccount projjeffsa --cluster $CLUSTERNAME
+  -- this deletes iamserviceaccount, serviceaccount and IAM role
 ```
